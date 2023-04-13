@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coins Volume RealTime</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'apexcharts.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'jquery.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for ('static', filename='css/index.css') }}">
+    <style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #F5F5F5;
+		}
+		h1 {
+			text-align: center;
+			margin-top: 30px;
+		}
+		form {
+			width: 50%;
+			margin: 0 auto;
+			background-color: white;
+			padding: 20px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+			border-radius: 5px;
+		}
+		label {
+			display: block;
+			margin-bottom: 10px;
+		}
+		input[type="text"], textarea {
+			width: 100%;
+			padding: 10px;
+			border-radius: 5px;
+			border: none;
+			box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+			margin-bottom: 20px;
+			font-size: 16px;
+		}
+		input[type="submit"] {
+			background-color: #CD5C5C;
+			color: white;
+			padding: 10px 20px;
+			border-radius: 5px;
+			border: none;
+			font-size: 16px;
+			cursor: pointer;
+		}
+		.success {
+			color: green;
+			font-weight: bold;
+			margin-top: 10px;
+		}
+	</style>
+	
+</head>
+
+<body>
+
+    <!-- <form ng-submit="submitForm()" id="backendRun">
+		<label for="tweet">Nhập chủ đề bạn quan tâm</label>
+		<textarea id="tweet" name="tweet" rows="4" ng-model="tweet"></textarea>
+		<input type="submit" value="Tìm kiếm">
+
+	</form> -->
+
+
+
+<div id="chart" class="box">
+    <div id="responsive-chart"></div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+	<script>
+        host = 'http://128.199.251.39'
+        if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+            host = 'http://127.0.0.1'
+        }
+		document.getElementById("backendRun").addEventListener("submit", function(event) {
+            event.preventDefault(); 
+            var tweetContent = document.getElementById("tweet").value; 
+            var xhr = new XMLHttpRequest(); 
+            var url = host + ":5102"; 
+            xhr.open("POST", url, true); 
+            xhr.setRequestHeader("Content-Type", "application/json"); 
+            var data = JSON.stringify({ tweet: tweetContent }); 
+            xhr.send(data); 
+            console.log(data)
+            xhr = new XMLHttpRequest(); 
+            url = host + ":5103"; 
+            xhr.open("GET", url, true); 
+            xhr.send(data); 
+        });
+	</script>
+<script>
+
+    var dataValues = []
+
+    {% for item in dataValues %}
+        dataValues.push({{item}})
+    {% endfor %}
+
+    var categoryValues = []
+    {% for item in categoryValues %}
+        categoryValues.push('{{item}}')
+    {% endfor %}
+
+    var options = {
+        title: {
+            text: "Measure of how much of a cryptocurrency was traded in the last 1 hours.",
+            align: "left",
+            style: {
+                fontSize: "20px"
+            }
+        },
+        chart: {
+            width: "100%",
+            height: 600,
+            type: "bar",
+            foreColor: "#fff",
+        },
+        fill: {
+            type: "gradient",
+            gradient: {
+                gradientToColors: ["#F55555", "#6078ea", "#6094ea"],
+                shade: "dark",
+                type: "horizontal",
+                shadeIntensity: 0.5,
+                inverseColors: true,
+                opacityFrom: 1,
+                stops: [0, 100]
+            }
+        },
+        tooltip: {
+            theme: "dark",
+        },
+        grid: {
+            borderColor: "#40475D"
+        },
+        colors: ["#FCCF31", "#17ead9", "#f02fc2"],
+        plotOptions: {
+            bar: {
+                horizontal: true,
+            }
+        },
+        dataLabels: {
+            enabled: true,
+        },
+        stroke: {
+            width: 0,
+        },
+        series: [
+            {
+                name: 'Volume',
+                data: dataValues
+            },
+        ],
+        xaxis: {
+            title: {
+                text: 'Volume (USD)',
+                style: {
+                    fontSize: "17px"
+                }
+            },
+            type: 'category',
+            categories: categoryValues,
+            axisBorder: {
+                color: "#333"
+            },
+        },
+        yaxis: {
+            title: {
+                text: 'Coin',
+                style: {
+                    fontSize: "17px"
+                }
+            },
+            labels: {
+                offsetX: 10
+            }
+        },
+        legend: {
+            position: "right",
+            verticalAlign: "top",
+            containerMargin: {
+                left: 35,
+                right: 60
+            }
+        },
+        responsive: [
+            {
+                breakpoint: 1000,
+                options: {
+                    fill: {
+                        type: "gradient",
+                        gradient: {
+                            shade: "dark",
+                            type: "vertical",
+                            shadeIntensity: 0.5,
+                            inverseColors: false,
+                            opacityFrom: 1,
+                            stops: [0, 100]
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: false
+                        }
+                    },
+                    legend: {
+                        position: "bottom"
+                    },
+                    xaxis: {
+                        title: {
+                            text: 'Coin'
+                        },
+                        axisBorder: {
+                            color: "#333"
+                        }
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Volume (USD)',
+                            style: {
+                                fontSize: "17px"
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    };
+
+    var chart = new ApexCharts(
+        document.querySelector("#responsive-chart"),
+        options
+    );
+
+    chart.render();
+
+    setInterval(() => {
+        $.getJSON('/refreshData', {}, (data) => {
+            options.series[0].data = data.dataValues;
+            options.xaxis.categories = data.categoryValues;
+        })
+        chart.updateOptions(options, false, true, true)
+
+    }, 1000);
+
+
+</script>
+</body>
+</html>
+

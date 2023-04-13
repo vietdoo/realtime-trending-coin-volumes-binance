@@ -1,0 +1,66 @@
+---
+version: '2'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9094:9094
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL    
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1  
+  producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.producer
+    volumes:
+      - ./kafka:/app
+    depends_on:
+      - kafka
+    command: python3 /app/producer.py
+
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    volumes:
+      - ./spark:/app
+    depends_on:
+      - kafka
+    command: python3 /app/streaming.py
+
+  
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.flask
+    ports: 
+      - 5029:5029  
+    volumes:
+      - ./flask:/app
+    depends_on:
+      - nginx
+    command: python3 /app/app.py
+  
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/proxy_params:/etc/nginx/proxy_params
+      - ./nginx/flask.conf:/etc/nginx/conf.d/flask.conf
